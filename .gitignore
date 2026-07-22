@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Xcode user-specific
+**/xcuserdata/
+**/*.xcuserstate
+
+# Swift Package Manager build artifacts
+**/.build/
+**/.swiftpm/
+
+# Xcode build output
+**/DerivedData/
+
+# Nested independent repositories (commit/push inside those repos)
+/SocialLoginSDK/
+/SocialLoginDemo/

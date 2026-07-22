@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:SocialLoginSDK">
+   </FileRef>
+   <FileRef
+      location = "group:SocialLoginSDK/SocialLoginSDK.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:SocialLoginDemo/SocialLoginDemo.xcodeproj">
+   </FileRef>
+</Workspace>
