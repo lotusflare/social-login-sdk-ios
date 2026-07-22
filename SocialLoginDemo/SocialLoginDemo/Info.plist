@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>GIDClientID</key>
+	<string>612650306126-vrj9rjci2qcdvrdeolncpmvtclur14a3.apps.googleusercontent.com</string>
+	<key>GIDServerClientID</key>
+	<string>612650306126-kkcahh7p9hf2h9nf327p93end8575viu.apps.googleusercontent.com</string>
+	<key>FacebookAppID</key>
+	<string>2033440097273647</string>
+	<key>FacebookClientToken</key>
+	<string>bd27c11eea15affc2debbeb8b00a74db</string>
+	<key>SocialLoginStagingBaseURL</key>
+	<string>https://rmax-dev.nomadsplits.com/appauth/</string>
+	<key>SocialLoginProductionBaseURL</key>
+	<string>https://rmax.nomadsplits.com/appauth/</string>
+	<key>SocialLoginClientID</key>
+	<string>nomad_wise_client</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fbauth</string>
+		<string>fbauth2</string>
+		<string>fb-messenger-share-api</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.612650306126-vrj9rjci2qcdvrdeolncpmvtclur14a3</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb2033440097273647</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

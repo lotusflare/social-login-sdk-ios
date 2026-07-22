@@ -11,7 +11,3 @@
 
 # Xcode build output
 **/DerivedData/
-
-# Nested independent repositories (commit/push inside those repos)
-/SocialLoginSDK/
-/SocialLoginDemo/
