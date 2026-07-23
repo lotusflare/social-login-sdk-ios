@@ -35,12 +35,16 @@ A Swift Package that aggregates social login providers for host apps, plus **ema
 
 ```
 social-login-sdk-ios/
-├── SocialLoginSDK/              # Swift Package (SDK)
-├── SocialLoginDemo/             # Demo app for manual verification
-└── SocialLoginSDKWorkspace.xcworkspace
+├── Package.swift                # Swift Package (repo root — remote SPM entry)
+├── Sources/
+│   └── SocialLoginSDK/          # SDK sources
+├── Docs/
+├── Example/
+│   └── SocialLoginDemo/         # Demo app for manual verification
+└── SocialLoginSDK.xcworkspace
 ```
 
-Open `SocialLoginSDKWorkspace.xcworkspace` in Xcode and run the `SocialLoginDemo` scheme.
+Open `SocialLoginSDK.xcworkspace` in Xcode and run the `SocialLoginDemo` scheme.
 
 ## Host App Integration
 
@@ -50,7 +54,7 @@ Code-side requirements for every host: put backend + provider credentials in Inf
 
 | Step | Google only | Apple only | Facebook only | All three |
 |------|:-----------:|:----------:|:-------------:|:---------:|
-| Add SPM package (`SocialLoginSDK/`) | ✓ | ✓ | ✓ | ✓ |
+| Add SPM package (Git URL or local repo root) | ✓ | ✓ | ✓ | ✓ |
 | Info.plist: backend Base URL + Client ID | ✓ | ✓ | ✓ | ✓ |
 | `setup` (`environment`) | ✓ | ✓ | ✓ | ✓ |
 | Sign-in UI (`signIn` / `signOut`) | ✓ | ✓ | ✓ | ✓ |
@@ -67,11 +71,18 @@ Code-side requirements for every host: put backend + provider credentials in Inf
 
 Details for each provider follow below.
 
-### 1. Add the local package
+### 1. Add the Swift package
 
-In Xcode: **File → Add Package Dependencies → Add Local** and select `SocialLoginSDK/`.
+**Remote (recommended for host apps):**
 
-Or add a local package reference to your project that points at `SocialLoginSDK`.
+1. Xcode → **File → Add Package Dependencies…**
+2. Enter `https://github.com/lotusflare/social-login-sdk-ios`
+3. Choose version rule **Exact** / **Up to Next Major** for tag `1.0.0` (or newer)
+4. Add the `SocialLoginSDK` product to your app target
+
+**Local (development):**
+
+**File → Add Package Dependencies → Add Local…** and select this repository root (the folder that contains `Package.swift`).
 
 ### 2. Configure Info.plist (Google)
 

@@ -8,6 +8,7 @@
 # Swift Package Manager build artifacts
 **/.build/
 **/.swiftpm/
+**/Package.resolved
 
 # Xcode build output
 **/DerivedData/

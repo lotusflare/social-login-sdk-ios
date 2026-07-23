@@ -114,7 +114,7 @@
 			mainGroup = D7EDCCAC2FF4D7FB0049007C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				D7EDCCCE2FF4E1000049007C /* XCLocalSwiftPackageReference "../SocialLoginSDK" */,
+				D7EDCCCE2FF4E1000049007C /* XCLocalSwiftPackageReference "../.." */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D7EDCCB62FF4D7FB0049007C /* Products */;
@@ -362,16 +362,16 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		D7EDCCCE2FF4E1000049007C /* XCLocalSwiftPackageReference "../SocialLoginSDK" */ = {
+		D7EDCCCE2FF4E1000049007C /* XCLocalSwiftPackageReference "../.." */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../SocialLoginSDK;
+			relativePath = ../..;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		D7EDCCCF2FF4E1000049007C /* SocialLoginSDK */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D7EDCCCE2FF4E1000049007C /* XCLocalSwiftPackageReference "../SocialLoginSDK" */;
+			package = D7EDCCCE2FF4E1000049007C /* XCLocalSwiftPackageReference "../.." */;
 			productName = SocialLoginSDK;
 		};
 /* End XCSwiftPackageProductDependency section */
