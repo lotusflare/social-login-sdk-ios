@@ -151,19 +151,34 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
 
     func requestEmailSignUpCode(
         email: String,
-        eventName: String?,
         language: String?,
         configuration: SocialLoginConfiguration,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         postJSON(
             path: BackendAPIPath.emailSignUpGetCode,
-            body: EmailGetCodeRequest(email: email, eventName: eventName, language: language),
+            body: EmailGetCodeRequest(email: email, language: language),
             configuration: configuration,
             accessToken: nil,
             decode: EmailSignUpGetCodeResponse.self
         ) { result in
-            completion(result.map { _ in () })
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let response):
+                let data = response.data
+                completion(
+                    .success(
+                        EmailCodeSendResult(
+                            email: data?.email,
+                            codeSent: data?.codeSent,
+                            needEmailVerify: data?.needEmailVerify,
+                            resendAfterSec: data?.resendAfterSec,
+                            lockRemainingSec: data?.lockRemainingSec
+                        )
+                    )
+                )
+            }
         }
     }
 
@@ -276,19 +291,32 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
 
     func requestPasswordResetCode(
         email: String,
-        eventName: String?,
         language: String?,
         configuration: SocialLoginConfiguration,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         postJSON(
             path: BackendAPIPath.passwordResetGetCode,
-            body: EmailGetCodeRequest(email: email, eventName: eventName, language: language),
+            body: EmailGetCodeRequest(email: email, language: language),
             configuration: configuration,
             accessToken: nil,
-            decode: BackendSuccessResponse.self
+            decode: PasswordOperationResponse.self
         ) { result in
-            completion(result.map { _ in () })
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let response):
+                let data = response.data
+                completion(
+                    .success(
+                        EmailCodeSendResult(
+                            success: data?.success,
+                            resendAfterSec: data?.resendAfterSec,
+                            lockRemainingSec: data?.lockRemainingSec
+                        )
+                    )
+                )
+            }
         }
     }
 
@@ -309,7 +337,7 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
             body: PasswordResetRequest(email: email, code: code, newPassword: newPassword),
             configuration: configuration,
             accessToken: nil,
-            decode: BackendSuccessResponse.self
+            decode: PasswordOperationResponse.self
         ) { result in
             switch result {
             case .failure(let error):
@@ -327,11 +355,10 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
     }
 
     func requestPasswordChangeCode(
-        eventName: String?,
         language: String?,
         accessToken: String,
         configuration: SocialLoginConfiguration,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         guard !accessToken.isEmpty else {
             completion(.failure(.notConfigured))
@@ -340,12 +367,26 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
 
         postJSON(
             path: BackendAPIPath.passwordChangeGetCode,
-            body: PasswordChangeGetCodeRequest(eventName: eventName, language: language),
+            body: PasswordChangeGetCodeRequest(language: language),
             configuration: configuration,
             accessToken: accessToken,
-            decode: BackendSuccessResponse.self
+            decode: PasswordOperationResponse.self
         ) { result in
-            completion(result.map { _ in () })
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let response):
+                let data = response.data
+                completion(
+                    .success(
+                        EmailCodeSendResult(
+                            success: data?.success,
+                            resendAfterSec: data?.resendAfterSec,
+                            lockRemainingSec: data?.lockRemainingSec
+                        )
+                    )
+                )
+            }
         }
     }
 
@@ -407,7 +448,7 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
             body: body,
             configuration: configuration,
             accessToken: accessToken,
-            decode: BackendSuccessResponse.self
+            decode: PasswordOperationResponse.self
         ) { result in
             switch result {
             case .failure(let error):

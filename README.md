@@ -227,12 +227,12 @@ The SDK exposes email register / sign-in / password APIs **without UI**. Host ap
 
 | Method | Backend |
 |--------|---------|
-| `requestEmailSignUpCode` | `POST /auth/email/sign_up/get_code` |
+| `requestEmailSignUpCode` | `POST /auth/email/sign_up/get_code` → `EmailCodeSendResult` (`resendAfterSec`, …) |
 | `completeEmailSignUp` | `POST /auth/email/sign_up` (no tokens; then call `signInWithEmail`) |
 | `signInWithEmail` | `POST /auth/email/sign_in` |
 | `isEmailRegistered` | `POST /auth/email/is_registered` → `EmailRegistrationStatus` (`registered`, `existsLoginTypes`) |
-| `requestPasswordResetCode` / `resetPassword` | forgot-password flow |
-| `requestPasswordChangeCode(accessToken:)` / `changePassword(accessToken:…)` | logged-in change (current password or code) |
+| `requestPasswordResetCode` / `resetPassword` | forgot-password (`get_code` → `EmailCodeSendResult`) |
+| `requestPasswordChangeCode(accessToken:)` / `changePassword(accessToken:…)` | logged-in change (`get_code` → `EmailCodeSendResult`) |
 
 Password reset/change success invalidates tokens server-side; the host should clear its local session. The Demo **Email** tab is for smoke-testing these APIs only.
 
@@ -381,20 +381,23 @@ The SDK maps these common appauth business codes to typed errors:
 | Code | SDK error |
 |------|-----------|
 | 40001 | `accessTokenInvalid` — call `refreshToken` |
+| 40002 | `invalidRequest` — parameter validation failed |
 | 44201 | `clientInvalid` |
 | 44202 | `loginMethodNotAllowed` |
 | 44203 | `userNotFound` |
-| 44204 | `invalidPassword` |
-| 44205 | `emailAlreadyRegistered` |
+| 44204 | `invalidPassword` (may include `existsLoginTypes` from error `body`) |
+| 44205 | `emailAlreadyRegistered` (may include `existsLoginTypes` from error `body`) |
 | 44206 | `registrationNotAllowed` |
 | 44207 | `oauthTokenInvalid` |
 | 44208 | `oauthEmailConflict` |
 | 44209 | `refreshTokenInvalid` |
-| 44211 | `rateLimited` |
+| 44211 | `rateLimited` — optional `resendAfterSec` / `lockRemainingSec` / `retryAfterSec` from error `body` |
 | 44214 | `emailCodeInvalid` |
 | 44219 | `passwordPolicyViolation` |
 | 44221 | `oauthNonceInvalid` — restart from fetching a new nonce |
 | 44222 | `oauthAudienceMismatch` |
+| 44223 | `emailCodeExpired` |
+| 44224 | `emailCodeAlreadyUsed` |
 
 Unknown / transport failures map to `backendRequestFailed(statusCode:code:message:)`. Known business codes map to the typed cases above.
 

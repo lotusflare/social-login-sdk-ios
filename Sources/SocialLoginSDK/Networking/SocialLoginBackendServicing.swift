@@ -26,10 +26,9 @@ protocol SocialLoginBackendServicing: Sendable {
 
     func requestEmailSignUpCode(
         email: String,
-        eventName: String?,
         language: String?,
         configuration: SocialLoginConfiguration,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     )
 
     func completeEmailSignUp(
@@ -55,10 +54,9 @@ protocol SocialLoginBackendServicing: Sendable {
 
     func requestPasswordResetCode(
         email: String,
-        eventName: String?,
         language: String?,
         configuration: SocialLoginConfiguration,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     )
 
     func resetPassword(
@@ -70,11 +68,10 @@ protocol SocialLoginBackendServicing: Sendable {
     )
 
     func requestPasswordChangeCode(
-        eventName: String?,
         language: String?,
         accessToken: String,
         configuration: SocialLoginConfiguration,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     )
 
     func changePasswordWithCurrent(

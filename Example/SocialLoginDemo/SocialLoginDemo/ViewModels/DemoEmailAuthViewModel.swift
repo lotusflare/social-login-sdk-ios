@@ -50,8 +50,8 @@ final class DemoEmailAuthViewModel: ObservableObject {
         run {
             SocialLoginSDK.requestEmailSignUpCode(email: email, language: "en-US") { [weak self] result in
                 Task { @MainActor in
-                    self?.finish(result) {
-                        self?.statusMessage = "Sign-up code sent (check email)."
+                    self?.finish(result) { send in
+                        self?.statusMessage = Self.codeSendStatus("Sign-up code sent", send)
                     }
                 }
             }
@@ -124,8 +124,8 @@ final class DemoEmailAuthViewModel: ObservableObject {
         run {
             SocialLoginSDK.requestPasswordResetCode(email: email, language: "en-US") { [weak self] result in
                 Task { @MainActor in
-                    self?.finish(result) {
-                        self?.statusMessage = "Reset code sent (always succeeds if request OK)."
+                    self?.finish(result) { send in
+                        self?.statusMessage = Self.codeSendStatus("Reset code sent", send)
                     }
                 }
             }
@@ -159,8 +159,8 @@ final class DemoEmailAuthViewModel: ObservableObject {
                 language: "en-US"
             ) { [weak self] result in
                 Task { @MainActor in
-                    self?.finish(result) {
-                        self?.statusMessage = "Change-password code sent to bound email."
+                    self?.finish(result) { send in
+                        self?.statusMessage = Self.codeSendStatus("Change-password code sent", send)
                     }
                 }
             }
@@ -222,6 +222,17 @@ final class DemoEmailAuthViewModel: ObservableObject {
         work()
     }
 
+    private static func codeSendStatus(_ prefix: String, _ send: EmailCodeSendResult) -> String {
+        var parts = [prefix]
+        if let resend = send.resendAfterSec {
+            parts.append("resend_after_sec=\(resend)")
+        }
+        if let lock = send.lockRemainingSec {
+            parts.append("lock_remaining_sec=\(lock)")
+        }
+        return parts.joined(separator: ". ") + "."
+    }
+
     private func finish<T>(_ result: Result<T, SocialLoginError>, onSuccess: (T) -> Void) {
         isLoading = false
         switch result {
@@ -229,7 +240,32 @@ final class DemoEmailAuthViewModel: ObservableObject {
             errorMessage = nil
             onSuccess(value)
         case .failure(let error):
-            errorMessage = error.localizedDescription
+            errorMessage = Self.describe(error)
+        }
+    }
+
+    private static func describe(_ error: SocialLoginError) -> String {
+        switch error {
+        case .rateLimited(let message, let resendAfterSec, let lockRemainingSec, let retryAfterSec):
+            var parts = [message]
+            if let resendAfterSec {
+                parts.append("resend_after_sec=\(resendAfterSec)")
+            }
+            if let lockRemainingSec {
+                parts.append("lock_remaining_sec=\(lockRemainingSec)")
+            }
+            if let retryAfterSec {
+                parts.append("retry_after_sec=\(retryAfterSec)")
+            }
+            return parts.joined(separator: " | ")
+        case .emailAlreadyRegistered(let message, let types),
+             .invalidPassword(let message, let types):
+            if types.isEmpty {
+                return message
+            }
+            return "\(message) (exists_login_types: \(types.map(\.rawValue).joined(separator: ", ")))"
+        default:
+            return error.localizedDescription
         }
     }
 

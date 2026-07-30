@@ -51,13 +51,11 @@ public enum SocialLoginSDK {
 
     public static func requestEmailSignUpCode(
         email: String,
-        eventName: String? = nil,
         language: String? = nil,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         manager.requestEmailSignUpCode(
             email: email,
-            eventName: eventName,
             language: language,
             completion: completion
         )
@@ -94,13 +92,11 @@ public enum SocialLoginSDK {
 
     public static func requestPasswordResetCode(
         email: String,
-        eventName: String? = nil,
         language: String? = nil,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         manager.requestPasswordResetCode(
             email: email,
-            eventName: eventName,
             language: language,
             completion: completion
         )
@@ -122,13 +118,11 @@ public enum SocialLoginSDK {
 
     public static func requestPasswordChangeCode(
         accessToken: String,
-        eventName: String? = nil,
         language: String? = nil,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         manager.requestPasswordChangeCode(
             accessToken: accessToken,
-            eventName: eventName,
             language: language,
             completion: completion
         )

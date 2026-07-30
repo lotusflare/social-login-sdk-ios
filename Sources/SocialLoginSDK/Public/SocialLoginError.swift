@@ -9,11 +9,13 @@ public enum SocialLoginError: Error, Sendable {
     case missingPresenter
     /// Transport / unknown-business-code / invalid envelope fallback for appauth HTTP.
     case backendRequestFailed(statusCode: Int?, code: Int?, message: String)
+    /// Gateway / IAM `40002`: request parameter validation failed.
+    case invalidRequest(message: String)
     case clientInvalid(message: String)
     case loginMethodNotAllowed(message: String)
     case userNotFound(message: String)
-    case invalidPassword(message: String)
-    case emailAlreadyRegistered(message: String)
+    case invalidPassword(message: String, existsLoginTypes: [SocialLoginLoginType] = [])
+    case emailAlreadyRegistered(message: String, existsLoginTypes: [SocialLoginLoginType] = [])
     case registrationNotAllowed(message: String)
     case oauthTokenInvalid(String)
     case oauthEmailConflict(String)
@@ -21,8 +23,18 @@ public enum SocialLoginError: Error, Sendable {
     case accessTokenInvalid(message: String)
     /// Appauth `44209`, or a missing / unusable refresh token on the client.
     case refreshTokenInvalid(message: String)
-    case rateLimited(String)
+    /// Appauth `44211`. Timing fields come from error `body` when present.
+    case rateLimited(
+        message: String,
+        resendAfterSec: Int? = nil,
+        lockRemainingSec: Int? = nil,
+        retryAfterSec: Int? = nil
+    )
     case emailCodeInvalid(message: String)
+    /// Appauth `44223`: email verification code expired.
+    case emailCodeExpired(message: String)
+    /// Appauth `44224`: email verification code already used.
+    case emailCodeAlreadyUsed(message: String)
     case passwordPolicyViolation(message: String)
     case oauthNonceInvalid(String)
     case oauthAudienceMismatch(message: String)
@@ -62,15 +74,17 @@ extension SocialLoginError: LocalizedError {
                 return "Backend request failed: \(message)"
             }
             return "Backend request failed (\(parts.joined(separator: ", "))): \(message)"
+        case .invalidRequest(let message):
+            return message
         case .clientInvalid(let message):
             return message
         case .loginMethodNotAllowed(let message):
             return message
         case .userNotFound(let message):
             return message
-        case .invalidPassword(let message):
+        case .invalidPassword(let message, _):
             return message
-        case .emailAlreadyRegistered(let message):
+        case .emailAlreadyRegistered(let message, _):
             return message
         case .registrationNotAllowed(let message):
             return message
@@ -82,9 +96,13 @@ extension SocialLoginError: LocalizedError {
             return message
         case .refreshTokenInvalid(let message):
             return message
-        case .rateLimited(let message):
+        case .rateLimited(let message, _, _, _):
             return message
         case .emailCodeInvalid(let message):
+            return message
+        case .emailCodeExpired(let message):
+            return message
+        case .emailCodeAlreadyUsed(let message):
             return message
         case .passwordPolicyViolation(let message):
             return message

@@ -37,6 +37,34 @@ public struct EmailSignUpResult: Sendable {
     }
 }
 
+/// Result of `*/get_code` (sign-up / password reset / password change).
+public struct EmailCodeSendResult: Sendable {
+    public let email: String?
+    public let codeSent: Bool?
+    public let needEmailVerify: Bool?
+    public let success: Bool?
+    /// Seconds until the next send is allowed (cooldown).
+    public let resendAfterSec: Int?
+    /// Seconds remaining on OTP / credential lock when present.
+    public let lockRemainingSec: Int?
+
+    public init(
+        email: String? = nil,
+        codeSent: Bool? = nil,
+        needEmailVerify: Bool? = nil,
+        success: Bool? = nil,
+        resendAfterSec: Int? = nil,
+        lockRemainingSec: Int? = nil
+    ) {
+        self.email = email
+        self.codeSent = codeSent
+        self.needEmailVerify = needEmailVerify
+        self.success = success
+        self.resendAfterSec = resendAfterSec
+        self.lockRemainingSec = lockRemainingSec
+    }
+}
+
 enum PasswordPolicy {
     /// AppAuth §6 local pre-check. Returns an error message when invalid.
     static func validationMessage(for password: String) -> String? {

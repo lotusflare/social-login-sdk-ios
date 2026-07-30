@@ -126,9 +126,8 @@ final class SocialLoginManager {
 
     func requestEmailSignUpCode(
         email: String,
-        eventName: String?,
         language: String?,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         guard let configuration else {
             completion(.failure(.notConfigured))
@@ -136,7 +135,6 @@ final class SocialLoginManager {
         }
         backendClient.requestEmailSignUpCode(
             email: email,
-            eventName: eventName,
             language: language,
             configuration: configuration,
             completion: completion
@@ -196,9 +194,8 @@ final class SocialLoginManager {
 
     func requestPasswordResetCode(
         email: String,
-        eventName: String?,
         language: String?,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         guard let configuration else {
             completion(.failure(.notConfigured))
@@ -206,7 +203,6 @@ final class SocialLoginManager {
         }
         backendClient.requestPasswordResetCode(
             email: email,
-            eventName: eventName,
             language: language,
             configuration: configuration,
             completion: completion
@@ -234,9 +230,8 @@ final class SocialLoginManager {
 
     func requestPasswordChangeCode(
         accessToken: String,
-        eventName: String?,
         language: String?,
-        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+        completion: @escaping (Result<EmailCodeSendResult, SocialLoginError>) -> Void
     ) {
         guard let configuration else {
             completion(.failure(.notConfigured))
@@ -247,7 +242,6 @@ final class SocialLoginManager {
             return
         }
         backendClient.requestPasswordChangeCode(
-            eventName: eventName,
             language: language,
             accessToken: accessToken,
             configuration: configuration,

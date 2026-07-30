@@ -96,11 +96,18 @@ struct BackendLogoutResponse: Decodable, Sendable, BackendCodedResponse {
 struct BackendErrorResponse: Decodable, Sendable {
     let code: Int?
     let message: String?
+    let body: BodyPayload?
+
+    struct BodyPayload: Decodable, Sendable {
+        let resendAfterSec: Int?
+        let lockRemainingSec: Int?
+        let retryAfterSec: Int?
+        let existsLoginTypes: [String]?
+    }
 }
 
 struct EmailGetCodeRequest: Encodable, Sendable {
     let email: String
-    let eventName: String?
     let language: String?
 }
 
@@ -112,6 +119,8 @@ struct EmailSignUpGetCodeResponse: Decodable, Sendable, BackendCodedResponse {
         let email: String?
         let codeSent: Bool?
         let needEmailVerify: Bool?
+        let resendAfterSec: Int?
+        let lockRemainingSec: Int?
     }
 }
 
@@ -169,16 +178,17 @@ struct PasswordChangeWithCodeRequest: Encodable, Sendable {
 }
 
 struct PasswordChangeGetCodeRequest: Encodable, Sendable {
-    let eventName: String?
     let language: String?
 }
 
-struct BackendSuccessResponse: Decodable, Sendable, BackendCodedResponse {
+struct PasswordOperationResponse: Decodable, Sendable, BackendCodedResponse {
     let code: Int?
     let data: DataPayload?
 
     struct DataPayload: Decodable, Sendable {
         let success: Bool?
+        let resendAfterSec: Int?
+        let lockRemainingSec: Int?
     }
 }
 
@@ -207,6 +217,8 @@ enum BackendAPIPath {
 enum BackendErrorCode: Int, Sendable {
     /// Access token expired or invalid (IAM / gateway).
     case accessTokenInvalid = 40001
+    /// Request parameter validation failed (IAM / gateway).
+    case invalidRequest = 40002
     case clientInvalid = 44201
     case loginMethodNotAllowed = 44202
     case userNotFound = 44203
@@ -221,6 +233,8 @@ enum BackendErrorCode: Int, Sendable {
     case passwordPolicyViolation = 44219
     case oauthNonceInvalid = 44221
     case oauthAudienceMismatch = 44222
+    case emailCodeExpired = 44223
+    case emailCodeAlreadyUsed = 44224
 }
 
 enum TokenExpiry {
