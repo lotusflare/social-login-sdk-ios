@@ -1,31 +1,25 @@
-import FacebookCore
 import Foundation
 import UIKit
+
+@_exported import FacebookCore
 
 public enum SocialLoginSDK {
     private static let manager = SocialLoginManager()
 
-    /// Configures backend / provider credentials only (no Facebook app lifecycle).
-    /// Use from app extensions (e.g. Widget) that need networking such as `refreshToken`.
-    /// Does not load or persist sessions — the host owns token storage.
-    @discardableResult
-    public static func configure(
-        _ configuration: SocialLoginConfiguration
-    ) -> SocialLoginError? {
-        manager.configure(configuration)
-    }
-
-    /// Configures the SDK and initializes Facebook lifecycle hooks.
-    /// Prefer this from the main app `application(_:didFinishLaunchingWithOptions:)`.
+    /// Configures backend / provider credentials for this process.
+    /// Safe for the main app and app extensions (e.g. Widget); does not require `UIApplication`.
+    ///
+    /// When Facebook Login is enabled in the **main app**, call
+    /// `ApplicationDelegate.shared.application(_:didFinishLaunchingWithOptions:)` **before**
+    /// `setup` (Meta requirement). Extensions should not call the Facebook app lifecycle hook.
+    /// (`ApplicationDelegate` is available via this module’s FacebookCore re-export.)
+    ///
     /// Does not load or persist sessions — the host owns token storage.
     @discardableResult
     public static func setup(
-        configuration: SocialLoginConfiguration,
-        application: UIApplication,
-        launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+        configuration: SocialLoginConfiguration
     ) -> SocialLoginError? {
-        _ = ApplicationDelegate.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
-        return configure(configuration)
+        manager.configure(configuration)
     }
 
     public static func isProviderConfigured(_ provider: SocialLoginProvider) -> Bool {

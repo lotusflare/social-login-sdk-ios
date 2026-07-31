@@ -49,8 +49,7 @@ final class DemoLoginViewModel: ObservableObject {
         errorMessage = nil
 
         if let error = SocialLoginSDK.setup(
-            configuration: DemoEnvironmentConfig.configuration(for: environment),
-            application: UIApplication.shared
+            configuration: DemoEnvironmentConfig.configuration(for: environment)
         ) {
             session = nil
             errorMessage = error.localizedDescription

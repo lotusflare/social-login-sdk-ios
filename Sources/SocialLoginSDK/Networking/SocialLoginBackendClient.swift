@@ -574,8 +574,18 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
         completion: @escaping (Result<HTTPPayload, SocialLoginError>) -> Void
     ) {
         session.dataTask(with: request) { data, response, error in
+            let finish: (Result<HTTPPayload, SocialLoginError>) -> Void = { result in
+                if Thread.isMainThread {
+                    completion(result)
+                } else {
+                    DispatchQueue.main.async {
+                        completion(result)
+                    }
+                }
+            }
+
             if let error {
-                completion(
+                finish(
                     .failure(.backendRequestFailed(statusCode: nil, code: nil, message: error.localizedDescription))
                 )
                 return
@@ -583,7 +593,7 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
 
             let statusCode = (response as? HTTPURLResponse)?.statusCode
             guard let data else {
-                completion(
+                finish(
                     .failure(.backendRequestFailed(statusCode: statusCode, code: nil, message: "Empty response body."))
                 )
                 return
@@ -592,11 +602,11 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
             // Appauth business errors use HTTP 400 with body.code != 0.
             // Deliver body for envelope decoding; treat 5xx as immediate parse/failure path.
             if let statusCode, statusCode >= 500 {
-                completion(.failure(BackendErrorParser.parse(data: data, statusCode: statusCode)))
+                finish(.failure(BackendErrorParser.parse(data: data, statusCode: statusCode)))
                 return
             }
 
-            completion(.success(HTTPPayload(data: data, statusCode: statusCode)))
+            finish(.success(HTTPPayload(data: data, statusCode: statusCode)))
         }.resume()
     }
 

@@ -17,8 +17,9 @@ A Swift Package that aggregates social login providers for host apps, plus **ema
 | `SocialLoginError.backendExchangeFailed` / `backendLoginFailed` / `nonceFailed` / `logoutFailed` | `backendRequestFailed(statusCode:code:message:)` |
 | `SocialLoginError.sessionNotFound` | Removed |
 | `BackendConfiguration` required in `configure` | Optional; prefer Info.plist backend keys |
+| Google / Facebook client IDs on `SocialLoginConfiguration` | Removed — Info.plist only (`GIDClientID`, `GIDServerClientID`, `FacebookAppID`, `FacebookClientToken`) |
 | `FacebookLoginTracking` / `FacebookSignInConfiguration.tracking` | Removed (Limited Login is always used) |
-| `SocialLoginSDK.bootstrap` / `configure` / `application(_:didFinishLaunchingWithOptions:)` | Removed public `bootstrap`; use `setup` (main app) or `configure` (extensions / networking-only) |
+| `SocialLoginSDK.bootstrap` / `configure` / `application(_:didFinishLaunchingWithOptions:)` | Single `setup(configuration:)` (no `UIApplication`); host owns Facebook `ApplicationDelegate` launch hook |
 | `BackendConfiguration.PathOverrides` / path init params | Removed — paths fixed in SDK |
 | `refreshSession` / `refreshSession(_ session:)` | `refreshToken(_:)` — pass stored refresh token only |
 | `signOut()` / `signOut(accessToken:provider:)` | `signOut(accessToken:)` — host clears its own store |
@@ -29,7 +30,7 @@ A Swift Package that aggregates social login providers for host apps, plus **ema
 | `44212` nonce invalid | `44221` only (`44212` no longer mapped) |
 | `businessLine` / `userStatus` on session | Removed (v2 `user_profile`) |
 | `linkedProviders` / `email` / `userID` / `provider` / `displayName` / `avatarURL` on session | `providers` / `primaryEmail` / `userId` only (align with `user_profile`; client-only fields removed) |
-| — | New: `setup` / `isProviderConfigured` / `refreshToken` / email networking APIs |
+| — | New: `setup(configuration:)` / `isProviderConfigured` / `refreshToken` / email networking APIs |
 
 ## Project Structure
 
@@ -169,7 +170,27 @@ Add Facebook keys, URL scheme, and query schemes alongside any Google entries:
 
 #### App lifecycle
 
-Prefer `SocialLoginSDK.setup` in `AppDelegate` — it initializes the Facebook SDK lifecycle hooks and configures credentials/backend from Info.plist. Session persistence is the host’s responsibility. See **§5**.
+When Facebook Login is enabled, call Meta’s launch hook **before** `SocialLoginSDK.setup` in the **main app**:
+
+```swift
+import SocialLoginSDK
+
+func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+) -> Bool {
+    _ = ApplicationDelegate.shared.application(
+        application,
+        didFinishLaunchingWithOptions: launchOptions
+    )
+    _ = SocialLoginSDK.setup(
+        configuration: SocialLoginConfiguration(environment: .production)
+    )
+    return true
+}
+```
+
+Widget / other extensions: call only `SocialLoginSDK.setup(configuration:)` (no Facebook lifecycle). Session persistence remains the host’s responsibility. See **§5**.
 
 Facebook Login also uses `handleOpenURL` for SSO callbacks (same as Google).
 
@@ -187,7 +208,7 @@ Add environment-specific gateway URLs and client ID:
 <!-- Optional per-environment overrides: SocialLoginStagingClientID / SocialLoginProductionClientID -->
 ```
 
-Google / Facebook client credentials are also read from Info.plist (`GIDClientID`, `GIDServerClientID`, `FacebookAppID`, `FacebookClientToken`). Explicit values passed to `SocialLoginConfiguration` always override Info.plist.
+Google / Facebook client credentials are read **only** from Info.plist (`GIDClientID`, `GIDServerClientID`, `FacebookAppID`, `FacebookClientToken`). They cannot be passed via `SocialLoginConfiguration`.
 
 UIKit launch (recommended):
 
@@ -196,10 +217,14 @@ func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
 ) -> Bool {
+    // Facebook-enabled main app only — call before setup:
+    _ = ApplicationDelegate.shared.application(
+        application,
+        didFinishLaunchingWithOptions: launchOptions
+    )
+
     if let error = SocialLoginSDK.setup(
-        configuration: SocialLoginConfiguration(environment: .production),
-        application: application,
-        launchOptions: launchOptions
+        configuration: SocialLoginConfiguration(environment: .production)
     ) {
         // Missing plist backend keys, etc.
         print(error.localizedDescription)
@@ -210,8 +235,7 @@ func application(
 }
 ```
 
-`setup` is the main-app launch entry point (includes Facebook lifecycle).  
-For Widget / app extensions that only need networking (`refreshToken`, email APIs, etc.), call `configure(_:)` instead — no `UIApplication` required. Main-app `setup` does not configure the extension process.
+`setup(configuration:)` is the single entry point for the main app and extensions (e.g. Widget). It does not take `UIApplication`. When Facebook is enabled, the **host** must call `ApplicationDelegate.shared.application(_:didFinishLaunchingWithOptions:)` in the main app **before** `setup` (`ApplicationDelegate` is available through `import SocialLoginSDK`). Extensions should not call that Facebook hook.
 
 Use `isProviderConfigured(_:)` to hide unavailable provider buttons.
 
@@ -312,7 +336,7 @@ Prefer Info.plist for gateway **Base URL** and **`X-Client-Id`**. Pass only `env
 | `environment` | `.staging` | `.production` |
 | Info.plist Base URL | `SocialLoginStagingBaseURL` | `SocialLoginProductionBaseURL` |
 | Info.plist Client ID | `SocialLoginClientID` (or `SocialLoginStagingClientID`) | `SocialLoginClientID` (or `SocialLoginProductionClientID`) |
-| Google / Facebook client IDs | Info.plist (`GIDClientID`, `GIDServerClientID`, `FacebookAppID`, `FacebookClientToken`) | same keys (or configure overrides) |
+| Google / Facebook client IDs | Info.plist only (`GIDClientID`, `GIDServerClientID`, `FacebookAppID`, `FacebookClientToken`) | same keys |
 
 For full environment isolation (different URL schemes per client), use separate Xcode build configurations and Info.plist files.
 
@@ -370,7 +394,7 @@ Backend (Info.plist, selected by `environment`):
 
 API paths (`/auth/social/nonce`, `/auth/social/sign_in`, `/auth/sign_out`, `/auth/refresh_token`, email/password routes) are fixed inside the SDK. Hosts only configure gateway `baseURL` and `clientID`.
 
-Provider credentials are read from the host Info.plist when not passed into `SocialLoginConfiguration`:
+Provider credentials are read **only** from the host Info.plist:
 
 - `GIDClientID`: iOS client ID
 - `GIDServerClientID`: Web client ID (aligns ID token `aud` with backend validation)
@@ -523,5 +547,5 @@ Replace `YOUR_FACEBOOK_APP_ID` and `YOUR_FACEBOOK_CLIENT_TOKEN` in `Info.plist` 
 3. Register your iOS Bundle ID under the iOS platform settings.
 4. Add `fb{APP_ID}` as a URL scheme in Info.plist.
 5. Add `fbapi`, `fbauth`, `fbauth2`, and `fb-messenger-share-api` to `LSApplicationQueriesSchemes`.
-6. Call `SocialLoginSDK.setup(...)` at **main app** launch (covers Facebook lifecycle). Extensions should use `configure(_:)` if they need SDK networking.
+6. Main app: call Facebook `ApplicationDelegate.application(_:didFinishLaunchingWithOptions:)` (if using Facebook), then `SocialLoginSDK.setup(configuration:)`. Extensions: `setup(configuration:)` only.
 7. Add test users while the app is in development mode.

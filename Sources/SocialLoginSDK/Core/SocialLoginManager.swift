@@ -309,7 +309,14 @@ final class SocialLoginManager {
             rawNonce: rawNonce
         ) { [weak self] result in
             guard let self else { return }
-            self.loginWithProviderResult(result, configuration: configuration, completion: completion)
+            let continueLogin = {
+                self.loginWithProviderResult(result, configuration: configuration, completion: completion)
+            }
+            if Thread.isMainThread {
+                continueLogin()
+            } else {
+                DispatchQueue.main.async(execute: continueLogin)
+            }
         }
     }
 

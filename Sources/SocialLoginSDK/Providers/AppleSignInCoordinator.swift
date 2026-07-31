@@ -11,25 +11,34 @@ final class AppleSignInCoordinator: NSObject {
         presenting viewController: UIViewController,
         completion: @escaping (Result<ASAuthorizationAppleIDCredential, SocialLoginError>) -> Void
     ) {
-        guard let window = presentationAnchor(for: viewController) else {
-            completion(.failure(.missingPresenter))
-            return
+        let begin: () -> Void = { [weak self] in
+            guard let self else { return }
+            guard let window = self.presentationAnchor(for: viewController) else {
+                completion(.failure(.missingPresenter))
+                return
+            }
+
+            self.anchorWindow = window
+            self.continuation = completion
+
+            let provider = ASAuthorizationAppleIDProvider()
+            let request = provider.createRequest()
+            request.requestedScopes = scopes.map(\.asAuthorizationScope)
+            if let hashedNonce, !hashedNonce.isEmpty {
+                request.nonce = hashedNonce
+            }
+
+            let controller = ASAuthorizationController(authorizationRequests: [request])
+            controller.delegate = self
+            controller.presentationContextProvider = self
+            controller.performRequests()
         }
 
-        anchorWindow = window
-        continuation = completion
-
-        let provider = ASAuthorizationAppleIDProvider()
-        let request = provider.createRequest()
-        request.requestedScopes = scopes.map(\.asAuthorizationScope)
-        if let hashedNonce, !hashedNonce.isEmpty {
-            request.nonce = hashedNonce
+        if Thread.isMainThread {
+            begin()
+        } else {
+            DispatchQueue.main.async(execute: begin)
         }
-
-        let controller = ASAuthorizationController(authorizationRequests: [request])
-        controller.delegate = self
-        controller.presentationContextProvider = self
-        controller.performRequests()
     }
 
     private func presentationAnchor(for viewController: UIViewController) -> UIWindow? {

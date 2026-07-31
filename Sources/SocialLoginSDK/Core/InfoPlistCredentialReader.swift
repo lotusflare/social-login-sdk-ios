@@ -76,32 +76,25 @@ enum InfoPlistCredentialReader {
 }
 
 extension SocialLoginConfiguration {
-    /// Fills missing Google / Facebook credentials from the host app Info.plist.
-    /// Explicit `configure` values always win over plist entries.
+    /// Loads Google / Facebook credentials from the host app Info.plist only.
     func resolvingProviderCredentials(from bundle: Bundle = .main) -> SocialLoginConfiguration {
         SocialLoginConfiguration(
             environment: environment,
-            googleClientID: Self.coalesce(
-                googleClientID,
-                InfoPlistCredentialReader.string(forKey: InfoPlistCredentialKeys.googleClientID, bundle: bundle)
+            googleClientID: InfoPlistCredentialReader.string(
+                forKey: InfoPlistCredentialKeys.googleClientID,
+                bundle: bundle
             ),
-            googleServerClientID: Self.coalesce(
-                googleServerClientID,
-                InfoPlistCredentialReader.string(
-                    forKey: InfoPlistCredentialKeys.googleServerClientID,
-                    bundle: bundle
-                )
+            googleServerClientID: InfoPlistCredentialReader.string(
+                forKey: InfoPlistCredentialKeys.googleServerClientID,
+                bundle: bundle
             ),
-            facebookAppID: Self.coalesce(
-                facebookAppID,
-                InfoPlistCredentialReader.string(forKey: InfoPlistCredentialKeys.facebookAppID, bundle: bundle)
+            facebookAppID: InfoPlistCredentialReader.string(
+                forKey: InfoPlistCredentialKeys.facebookAppID,
+                bundle: bundle
             ),
-            facebookClientToken: Self.coalesce(
-                facebookClientToken,
-                InfoPlistCredentialReader.string(
-                    forKey: InfoPlistCredentialKeys.facebookClientToken,
-                    bundle: bundle
-                )
+            facebookClientToken: InfoPlistCredentialReader.string(
+                forKey: InfoPlistCredentialKeys.facebookClientToken,
+                bundle: bundle
             ),
             facebook: facebook,
             apple: apple,
@@ -144,15 +137,5 @@ extension SocialLoginConfiguration {
                 )
             )
         }
-    }
-
-    private static func coalesce(_ preferred: String?, _ fallback: String?) -> String? {
-        if let preferred {
-            let trimmed = preferred.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-        }
-        return fallback
     }
 }

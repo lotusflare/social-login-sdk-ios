@@ -41,32 +41,48 @@ public struct BackendConfiguration: Sendable {
 
 public struct SocialLoginConfiguration: Sendable {
     public let environment: SocialLoginEnvironment
-    /// Optional. When omitted, the SDK reads `GIDClientID` from the host Info.plist.
-    public let googleClientID: String?
-    /// Optional. When omitted, the SDK reads `GIDServerClientID` from the host Info.plist.
-    /// Web client ID for Google ID token `aud` alignment with appauth.
-    public let googleServerClientID: String?
-    /// Optional. When omitted, the SDK reads `FacebookAppID` from the host Info.plist.
-    public let facebookAppID: String?
-    /// Optional. When omitted, the SDK reads `FacebookClientToken` from the host Info.plist.
-    public let facebookClientToken: String?
+    /// From Info.plist `GIDClientID` after `setup` resolves credentials.
+    let googleClientID: String?
+    /// From Info.plist `GIDServerClientID` after `setup` resolves credentials.
+    let googleServerClientID: String?
+    /// From Info.plist `FacebookAppID` after `setup` resolves credentials.
+    let facebookAppID: String?
+    /// From Info.plist `FacebookClientToken` after `setup` resolves credentials.
+    let facebookClientToken: String?
     public let facebook: FacebookSignInConfiguration
     public let apple: AppleSignInConfiguration
     /// Optional. When omitted, the SDK reads environment-specific Base URL / Client ID from Info.plist.
     /// Every successful sign-in exchanges provider credentials for backend tokens.
     public let backend: BackendConfiguration?
 
-    /// Provider credentials and backend may be omitted when declared in Info.plist.
-    /// Explicit values passed here override Info.plist. `environment` is required.
+    /// Google / Facebook client credentials are read only from Info.plist
+    /// (`GIDClientID`, `GIDServerClientID`, `FacebookAppID`, `FacebookClientToken`).
+    /// `backend` may be omitted when declared in Info.plist. `environment` is required.
     public init(
         environment: SocialLoginEnvironment,
-        googleClientID: String? = nil,
-        googleServerClientID: String? = nil,
-        facebookAppID: String? = nil,
-        facebookClientToken: String? = nil,
         facebook: FacebookSignInConfiguration = FacebookSignInConfiguration(),
         apple: AppleSignInConfiguration = AppleSignInConfiguration(),
         backend: BackendConfiguration? = nil
+    ) {
+        self.environment = environment
+        self.googleClientID = nil
+        self.googleServerClientID = nil
+        self.facebookAppID = nil
+        self.facebookClientToken = nil
+        self.facebook = facebook
+        self.apple = apple
+        self.backend = backend
+    }
+
+    init(
+        environment: SocialLoginEnvironment,
+        googleClientID: String?,
+        googleServerClientID: String?,
+        facebookAppID: String?,
+        facebookClientToken: String?,
+        facebook: FacebookSignInConfiguration,
+        apple: AppleSignInConfiguration,
+        backend: BackendConfiguration?
     ) {
         self.environment = environment
         self.googleClientID = googleClientID

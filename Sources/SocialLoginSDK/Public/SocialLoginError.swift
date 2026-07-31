@@ -48,9 +48,9 @@ extension SocialLoginError: LocalizedError {
         case .missingProviderConfiguration(let provider):
             switch provider {
             case .google:
-                return "Google sign-in is not configured. Set googleClientID (and googleServerClientID for backend exchange)."
+                return "Google sign-in is not configured. Set GIDClientID and GIDServerClientID in Info.plist."
             case .facebook:
-                return "Facebook sign-in is not configured. Set facebookAppID and facebookClientToken."
+                return "Facebook sign-in is not configured. Set FacebookAppID and FacebookClientToken in Info.plist."
             case .apple:
                 return "Apple sign-in is not configured."
             }
