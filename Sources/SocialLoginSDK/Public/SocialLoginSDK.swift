@@ -5,7 +5,18 @@ import UIKit
 public enum SocialLoginSDK {
     private static let manager = SocialLoginManager()
 
+    /// Configures backend / provider credentials only (no Facebook app lifecycle).
+    /// Use from app extensions (e.g. Widget) that need networking such as `refreshToken`.
+    /// Does not load or persist sessions — the host owns token storage.
+    @discardableResult
+    public static func configure(
+        _ configuration: SocialLoginConfiguration
+    ) -> SocialLoginError? {
+        manager.configure(configuration)
+    }
+
     /// Configures the SDK and initializes Facebook lifecycle hooks.
+    /// Prefer this from the main app `application(_:didFinishLaunchingWithOptions:)`.
     /// Does not load or persist sessions — the host owns token storage.
     @discardableResult
     public static func setup(
@@ -14,7 +25,7 @@ public enum SocialLoginSDK {
         launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> SocialLoginError? {
         _ = ApplicationDelegate.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
-        return manager.configure(configuration)
+        return configure(configuration)
     }
 
     public static func isProviderConfigured(_ provider: SocialLoginProvider) -> Bool {

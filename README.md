@@ -18,7 +18,7 @@ A Swift Package that aggregates social login providers for host apps, plus **ema
 | `SocialLoginError.sessionNotFound` | Removed |
 | `BackendConfiguration` required in `configure` | Optional; prefer Info.plist backend keys |
 | `FacebookLoginTracking` / `FacebookSignInConfiguration.tracking` | Removed (Limited Login is always used) |
-| `SocialLoginSDK.bootstrap` / `configure` / `application(_:didFinishLaunchingWithOptions:)` | Removed — use `setup` only |
+| `SocialLoginSDK.bootstrap` / `configure` / `application(_:didFinishLaunchingWithOptions:)` | Removed public `bootstrap`; use `setup` (main app) or `configure` (extensions / networking-only) |
 | `BackendConfiguration.PathOverrides` / path init params | Removed — paths fixed in SDK |
 | `refreshSession` / `refreshSession(_ session:)` | `refreshToken(_:)` — pass stored refresh token only |
 | `signOut()` / `signOut(accessToken:provider:)` | `signOut(accessToken:)` — host clears its own store |
@@ -210,7 +210,10 @@ func application(
 }
 ```
 
-`setup` is the single launch entry point whether or not you enable Facebook login. Use `isProviderConfigured(_:)` to hide unavailable provider buttons.
+`setup` is the main-app launch entry point (includes Facebook lifecycle).  
+For Widget / app extensions that only need networking (`refreshToken`, email APIs, etc.), call `configure(_:)` instead — no `UIApplication` required. Main-app `setup` does not configure the extension process.
+
+Use `isProviderConfigured(_:)` to hide unavailable provider buttons.
 
 Sign-in always follows (paths are built into the SDK; hosts do not configure them):
 
@@ -520,5 +523,5 @@ Replace `YOUR_FACEBOOK_APP_ID` and `YOUR_FACEBOOK_CLIENT_TOKEN` in `Info.plist` 
 3. Register your iOS Bundle ID under the iOS platform settings.
 4. Add `fb{APP_ID}` as a URL scheme in Info.plist.
 5. Add `fbapi`, `fbauth`, `fbauth2`, and `fb-messenger-share-api` to `LSApplicationQueriesSchemes`.
-6. Call `SocialLoginSDK.setup(...)` at app launch (covers Facebook lifecycle).
+6. Call `SocialLoginSDK.setup(...)` at **main app** launch (covers Facebook lifecycle). Extensions should use `configure(_:)` if they need SDK networking.
 7. Add test users while the app is in development mode.
