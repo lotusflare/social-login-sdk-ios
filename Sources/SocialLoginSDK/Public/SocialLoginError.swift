@@ -9,6 +9,10 @@ public enum SocialLoginError: Error, Sendable {
     case missingPresenter
     /// Transport / unknown-business-code / invalid envelope fallback for appauth HTTP.
     case backendRequestFailed(statusCode: Int?, code: Int?, message: String)
+    /// Client-side HTTP request timed out (`URLError.timedOut`).
+    case timeOut(message: String)
+    /// Other `URLError` transport failures (offline, connection lost, DNS, etc.).
+    case networkError(message: String)
     /// Gateway / IAM `40002`: request parameter validation failed.
     case invalidRequest(message: String)
     case clientInvalid(message: String)
@@ -74,6 +78,10 @@ extension SocialLoginError: LocalizedError {
                 return "Backend request failed: \(message)"
             }
             return "Backend request failed (\(parts.joined(separator: ", "))): \(message)"
+        case .timeOut(let message):
+            return message
+        case .networkError(let message):
+            return message
         case .invalidRequest(let message):
             return message
         case .clientInvalid(let message):

@@ -11,6 +11,10 @@ public struct BackendConfiguration: Sendable {
     public let clientID: String
     public let deviceID: String?
     public let additionalHeaders: [String: String]
+    /// Optional per-request timeout in seconds for appauth HTTP calls.
+    /// When `nil`, the URLSession / system default timeout is used (typically 60s for
+    /// `URLSession.shared`). Values below 1 are clamped to 1 when applied.
+    public let requestTimeoutSeconds: Int?
 
     /// Creates a backend configuration for the official appauth gateway.
     /// Host apps typically only need `baseURL` and `clientID`. API paths are fixed in the SDK.
@@ -18,12 +22,14 @@ public struct BackendConfiguration: Sendable {
         baseURL: URL,
         clientID: String,
         deviceID: String? = nil,
-        additionalHeaders: [String: String] = [:]
+        additionalHeaders: [String: String] = [:],
+        requestTimeoutSeconds: Int? = nil
     ) {
         self.baseURL = baseURL
         self.clientID = clientID
         self.deviceID = deviceID
         self.additionalHeaders = additionalHeaders
+        self.requestTimeoutSeconds = requestTimeoutSeconds
     }
 
     func resolvedDeviceID() -> String {

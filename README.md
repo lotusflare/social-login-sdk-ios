@@ -331,6 +331,8 @@ MySessionStore.clear()
 
 Prefer Info.plist for gateway **Base URL** and **`X-Client-Id`**. Pass only `environment` at `setup` time. The SDK does not hardcode Dev/Prod endpoints or client IDs.
 
+Optional `requestTimeoutSeconds` on `BackendConfiguration` overrides each appauth HTTP request timeout (seconds). When omitted (including Info.plist-only backend setup), the system / `URLSession` default applies (typically 60s for `URLSession.shared`).
+
 | Setting | Staging (Dev) | Production |
 |---------|---------------|------------|
 | `environment` | `.staging` | `.production` |
@@ -426,7 +428,7 @@ The SDK maps these common appauth business codes to typed errors:
 | 44223 | `emailCodeExpired` |
 | 44224 | `emailCodeAlreadyUsed` |
 
-Unknown / transport failures map to `backendRequestFailed(statusCode:code:message:)`. Known business codes map to the typed cases above.
+Unknown / non-`URLError` transport failures map to `backendRequestFailed(statusCode:code:message:)`. For `URLError`, `.timedOut` maps to `timeOut`; all other codes map to `networkError`. Known business codes map to the typed cases above.
 
 ### Session ownership
 

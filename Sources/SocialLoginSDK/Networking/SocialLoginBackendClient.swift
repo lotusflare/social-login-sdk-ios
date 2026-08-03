@@ -503,7 +503,8 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
             return
         }
 
-        let request = BackendRequestBuilder.makeRequest(url: url, method: "GET", backend: backend)
+        var request = BackendRequestBuilder.makeRequest(url: url, method: "GET", backend: backend)
+        applyTimeoutIfNeeded(to: &request, configuration: configuration)
         send(request: request, decode: decode, completion: completion)
     }
 
@@ -530,6 +531,7 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
             backend: backend,
             accessToken: accessToken
         )
+        applyTimeoutIfNeeded(to: &request, configuration: configuration)
         do {
             request.httpBody = try BackendJSONCoder.encoder.encode(body)
         } catch {
@@ -540,6 +542,14 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
         }
 
         send(request: request, decode: decode, completion: completion)
+    }
+
+    private func applyTimeoutIfNeeded(
+        to request: inout URLRequest,
+        configuration: SocialLoginConfiguration
+    ) {
+        guard let seconds = configuration.backend?.requestTimeoutSeconds else { return }
+        request.timeoutInterval = TimeInterval(max(1, seconds))
     }
 
     private func send<Response: Decodable>(
@@ -585,9 +595,7 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
             }
 
             if let error {
-                finish(
-                    .failure(.backendRequestFailed(statusCode: nil, code: nil, message: error.localizedDescription))
-                )
+                finish(.failure(Self.mapTransportError(error)))
                 return
             }
 
@@ -608,6 +616,22 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
 
             finish(.success(HTTPPayload(data: data, statusCode: statusCode)))
         }.resume()
+    }
+
+    private static func mapTransportError(_ error: Error) -> SocialLoginError {
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .timedOut:
+                return .timeOut(message: urlError.localizedDescription)
+            default:
+                return .networkError(message: urlError.localizedDescription)
+            }
+        }
+        return .backendRequestFailed(
+            statusCode: nil,
+            code: nil,
+            message: error.localizedDescription
+        )
     }
 
     private func decodeEnvelope<T: Decodable>(
