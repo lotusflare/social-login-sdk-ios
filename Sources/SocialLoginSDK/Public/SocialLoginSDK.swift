@@ -70,12 +70,30 @@ public enum SocialLoginSDK {
         email: String,
         code: String,
         password: String,
-        completion: @escaping (Result<EmailSignUpResult, SocialLoginError>) -> Void
+        completion: @escaping (Result<SocialLoginSession, SocialLoginError>) -> Void
     ) {
         manager.completeEmailSignUp(
             email: email,
             code: code,
             password: password,
+            completion: completion
+        )
+    }
+
+    /// Pre-checks an email OTP without consuming it (`POST /auth/code/check`).
+    /// Host must still send the same `code` to the consuming API (sign-up / reset / change).
+    public static func checkEmailCode(
+        purpose: EmailCodeCheckPurpose,
+        code: String,
+        email: String? = nil,
+        accessToken: String? = nil,
+        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+    ) {
+        manager.checkEmailCode(
+            purpose: purpose,
+            code: code,
+            email: email,
+            accessToken: accessToken,
             completion: completion
         )
     }

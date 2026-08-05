@@ -187,7 +187,7 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
         code: String,
         password: String,
         configuration: SocialLoginConfiguration,
-        completion: @escaping (Result<EmailSignUpResult, SocialLoginError>) -> Void
+        completion: @escaping (Result<SocialLoginSession, SocialLoginError>) -> Void
     ) {
         if let policyError = PasswordPolicy.validate(password) {
             completion(.failure(policyError))
@@ -199,29 +199,93 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
             body: EmailSignUpRequest(email: email, code: code, password: password),
             configuration: configuration,
             accessToken: nil,
-            decode: EmailSignUpResponse.self
+            decode: BackendSessionResponse.self
         ) { result in
             switch result {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let response):
                 guard let data = response.data,
-                      let userID = data.userId,
-                      !userID.isEmpty else {
+                      let session = BackendSessionMapper.makeSession(
+                          from: data,
+                          environment: configuration.environment
+                      ) else {
                     completion(
                         .failure(.backendRequestFailed(statusCode: nil, code: nil, message: "Invalid sign-up response."))
                     )
                     return
                 }
-                completion(
-                    .success(
-                        EmailSignUpResult(
-                            userID: userID,
-                            email: data.email ?? email,
-                            registerCompleted: data.registerCompleted ?? true
+                completion(.success(session))
+            }
+        }
+    }
+
+    func checkEmailCode(
+        purpose: EmailCodeCheckPurpose,
+        code: String,
+        email: String?,
+        accessToken: String?,
+        configuration: SocialLoginConfiguration,
+        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+    ) {
+        let trimmedCode = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedCode.count == 6, trimmedCode.allSatisfy(\.isNumber) else {
+            completion(.failure(.invalidRequest(message: "Verification code must be 6 digits.")))
+            return
+        }
+
+        switch purpose {
+        case .signUp, .passwordReset:
+            guard let email, !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                completion(.failure(.invalidRequest(message: "Email is required for \(purpose.rawValue).")))
+                return
+            }
+        case .passwordChange:
+            guard let accessToken, !accessToken.isEmpty else {
+                completion(.failure(.invalidRequest(message: "Access token is required for password_change.")))
+                return
+            }
+        }
+
+        let resolvedEmail: String?
+        let resolvedAccessToken: String?
+        switch purpose {
+        case .signUp, .passwordReset:
+            resolvedEmail = email
+            resolvedAccessToken = nil
+        case .passwordChange:
+            resolvedEmail = nil
+            resolvedAccessToken = accessToken
+        }
+
+        postJSON(
+            path: BackendAPIPath.codeCheck,
+            body: EmailCodeCheckRequest(
+                purpose: purpose.rawValue,
+                code: trimmedCode,
+                email: resolvedEmail
+            ),
+            configuration: configuration,
+            accessToken: resolvedAccessToken,
+            decode: EmailCodeCheckResponse.self
+        ) { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let response):
+                guard response.data?.matched == true else {
+                    completion(
+                        .failure(
+                            .backendRequestFailed(
+                                statusCode: nil,
+                                code: nil,
+                                message: "Invalid code check response."
+                            )
                         )
                     )
-                )
+                    return
+                }
+                completion(.success(()))
             }
         }
     }

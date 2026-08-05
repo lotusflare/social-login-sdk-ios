@@ -62,9 +62,65 @@ final class DemoEmailAuthViewModel: ObservableObject {
         run {
             SocialLoginSDK.completeEmailSignUp(email: email, code: code, password: password) { [weak self] result in
                 Task { @MainActor in
-                    self?.finish(result) { signUp in
+                    self?.finish(result) { session in
+                        DemoSessionStore.save(session)
+                        self?.reloadSessionHint()
                         self?.statusMessage =
-                            "Registered user \(signUp.userID). Call email sign-in next (no token issued)."
+                            "Signed up and signed in as \(session.primaryEmail ?? session.userId)."
+                        NotificationCenter.default.post(name: .demoSessionDidChange, object: nil)
+                    }
+                }
+            }
+        }
+    }
+
+    func checkSignUpCode() {
+        run {
+            SocialLoginSDK.checkEmailCode(
+                purpose: .signUp,
+                code: code,
+                email: email
+            ) { [weak self] result in
+                Task { @MainActor in
+                    self?.finish(result) {
+                        self?.statusMessage = "Sign-up code matched (not consumed). Complete sign-up next."
+                    }
+                }
+            }
+        }
+    }
+
+    func checkPasswordResetCode() {
+        run {
+            SocialLoginSDK.checkEmailCode(
+                purpose: .passwordReset,
+                code: code,
+                email: email
+            ) { [weak self] result in
+                Task { @MainActor in
+                    self?.finish(result) {
+                        self?.statusMessage = "Reset code matched (not consumed). Reset password next."
+                    }
+                }
+            }
+        }
+    }
+
+    func checkPasswordChangeCode() {
+        guard let accessToken = DemoSessionStore.load()?.accessToken, !accessToken.isEmpty else {
+            errorMessage = "Sign in first (need access token)."
+            return
+        }
+
+        run {
+            SocialLoginSDK.checkEmailCode(
+                purpose: .passwordChange,
+                code: code,
+                accessToken: accessToken
+            ) { [weak self] result in
+                Task { @MainActor in
+                    self?.finish(result) {
+                        self?.statusMessage = "Change-password code matched (not consumed)."
                     }
                 }
             }
@@ -259,6 +315,7 @@ final class DemoEmailAuthViewModel: ObservableObject {
             }
             return parts.joined(separator: " | ")
         case .emailAlreadyRegistered(let message, let types),
+             .registrationAutoLoginFailed(let message, let types),
              .invalidPassword(let message, let types):
             if types.isEmpty {
                 return message

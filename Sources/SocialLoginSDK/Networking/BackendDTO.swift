@@ -130,14 +130,18 @@ struct EmailSignUpRequest: Encodable, Sendable {
     let password: String
 }
 
-struct EmailSignUpResponse: Decodable, Sendable, BackendCodedResponse {
+struct EmailCodeCheckRequest: Encodable, Sendable {
+    let purpose: String
+    let code: String
+    let email: String?
+}
+
+struct EmailCodeCheckResponse: Decodable, Sendable, BackendCodedResponse {
     let code: Int?
     let data: DataPayload?
 
     struct DataPayload: Decodable, Sendable {
-        let userId: String?
-        let email: String?
-        let registerCompleted: Bool?
+        let matched: Bool?
     }
 }
 
@@ -205,6 +209,7 @@ enum BackendAPIPath {
     static let emailSignUp = "/auth/email/sign_up"
     static let emailSignIn = "/auth/email/sign_in"
     static let emailIsRegistered = "/auth/email/is_registered"
+    static let codeCheck = "/auth/code/check"
 
     // Password
     static let passwordResetGetCode = "/auth/password/reset/get_code"
@@ -235,6 +240,8 @@ enum BackendErrorCode: Int, Sendable {
     case oauthAudienceMismatch = 44222
     case emailCodeExpired = 44223
     case emailCodeAlreadyUsed = 44224
+    /// Sign-up succeeded but auto-login token issuance failed.
+    case registrationAutoLoginFailed = 44226
 }
 
 enum TokenExpiry {

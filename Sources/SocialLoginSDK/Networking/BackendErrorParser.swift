@@ -46,6 +46,8 @@ enum BackendErrorParser {
             return .invalidPassword(message: resolvedMessage, existsLoginTypes: loginTypes)
         case .emailAlreadyRegistered:
             return .emailAlreadyRegistered(message: resolvedMessage, existsLoginTypes: loginTypes)
+        case .registrationAutoLoginFailed:
+            return .registrationAutoLoginFailed(message: resolvedMessage, existsLoginTypes: loginTypes)
         case .registrationNotAllowed:
             return .registrationNotAllowed(message: resolvedMessage)
         case .oauthTokenInvalid:

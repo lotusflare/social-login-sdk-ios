@@ -36,7 +36,16 @@ protocol SocialLoginBackendServicing: Sendable {
         code: String,
         password: String,
         configuration: SocialLoginConfiguration,
-        completion: @escaping (Result<EmailSignUpResult, SocialLoginError>) -> Void
+        completion: @escaping (Result<SocialLoginSession, SocialLoginError>) -> Void
+    )
+
+    func checkEmailCode(
+        purpose: EmailCodeCheckPurpose,
+        code: String,
+        email: String?,
+        accessToken: String?,
+        configuration: SocialLoginConfiguration,
+        completion: @escaping (Result<Void, SocialLoginError>) -> Void
     )
 
     func signInWithEmail(

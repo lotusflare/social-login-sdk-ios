@@ -20,6 +20,9 @@ public enum SocialLoginError: Error, Sendable {
     case userNotFound(message: String)
     case invalidPassword(message: String, existsLoginTypes: [SocialLoginLoginType] = [])
     case emailAlreadyRegistered(message: String, existsLoginTypes: [SocialLoginLoginType] = [])
+    /// Appauth `44226`: account created but auto-login token issuance failed.
+    /// Hosts should navigate like `emailAlreadyRegistered` (prompt sign-in).
+    case registrationAutoLoginFailed(message: String, existsLoginTypes: [SocialLoginLoginType] = [])
     case registrationNotAllowed(message: String)
     case oauthTokenInvalid(String)
     case oauthEmailConflict(String)
@@ -93,6 +96,8 @@ extension SocialLoginError: LocalizedError {
         case .invalidPassword(let message, _):
             return message
         case .emailAlreadyRegistered(let message, _):
+            return message
+        case .registrationAutoLoginFailed(let message, _):
             return message
         case .registrationNotAllowed(let message):
             return message

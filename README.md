@@ -255,13 +255,14 @@ The SDK exposes email register / sign-in / password APIs **without UI**. Host ap
 | Method | Backend |
 |--------|---------|
 | `requestEmailSignUpCode` | `POST /auth/email/sign_up/get_code` → `EmailCodeSendResult` (`resendAfterSec`, …) |
-| `completeEmailSignUp` | `POST /auth/email/sign_up` (no tokens; then call `signInWithEmail`) |
+| `completeEmailSignUp` | `POST /auth/email/sign_up` → `SocialLoginSession` (auto-login tokens; same shape as `signInWithEmail`) |
+| `checkEmailCode` | `POST /auth/code/check` (OTP pre-check; does **not** consume the code; `sign_up` / `password_reset` / `password_change`) |
 | `signInWithEmail` | `POST /auth/email/sign_in` |
 | `isEmailRegistered` | `POST /auth/email/is_registered` → `EmailRegistrationStatus` (`registered`, `existsLoginTypes`) |
 | `requestPasswordResetCode` / `resetPassword` | forgot-password (`get_code` → `EmailCodeSendResult`) |
 | `requestPasswordChangeCode(accessToken:)` / `changePassword(accessToken:…)` | logged-in change (`get_code` → `EmailCodeSendResult`) |
 
-Password reset/change success invalidates tokens server-side; the host should clear its local session. The Demo **Email** tab is for smoke-testing these APIs only.
+Optional UI flow: call `checkEmailCode` after the user enters the OTP, then call the consuming API (`completeEmailSignUp` / `resetPassword` / `changePassword`) with the **same** code. Password reset/change success invalidates tokens server-side; the host should clear its local session. The Demo **Email** tab is for smoke-testing these APIs only.
 
 ### 6. Handle OAuth redirect URLs (Google & Facebook)
 
@@ -306,7 +307,7 @@ SocialLoginSDK.signIn(provider: .facebook, from: viewController) { result in
 
 ### 8. Host-owned session storage
 
-The SDK does **not** persist business tokens. After `signIn` / `signInWithEmail`, save the returned `SocialLoginSession` yourself (Keychain recommended in production). On cold start, load your store after `setup`, then optionally call `refreshToken` when access expiry is past.
+The SDK does **not** persist business tokens. After `signIn` / `signInWithEmail` / `completeEmailSignUp`, save the returned `SocialLoginSession` yourself (Keychain recommended in production). On cold start, load your store after `setup`, then optionally call `refreshToken` when access expiry is past.
 
 ```swift
 SocialLoginSDK.signIn(provider: .google, from: viewController) { result in
@@ -427,6 +428,7 @@ The SDK maps these common appauth business codes to typed errors:
 | 44222 | `oauthAudienceMismatch` |
 | 44223 | `emailCodeExpired` |
 | 44224 | `emailCodeAlreadyUsed` |
+| 44226 | `registrationAutoLoginFailed` — account created but auto-login failed; navigate like `emailAlreadyRegistered` (prompt `signInWithEmail`) |
 
 Unknown / non-`URLError` transport failures map to `backendRequestFailed(statusCode:code:message:)`. For `URLError`, `.timedOut` maps to `timeOut`; all other codes map to `networkError`. Known business codes map to the typed cases above.
 

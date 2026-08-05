@@ -145,7 +145,7 @@ final class SocialLoginManager {
         email: String,
         code: String,
         password: String,
-        completion: @escaping (Result<EmailSignUpResult, SocialLoginError>) -> Void
+        completion: @escaping (Result<SocialLoginSession, SocialLoginError>) -> Void
     ) {
         guard let configuration else {
             completion(.failure(.notConfigured))
@@ -155,6 +155,27 @@ final class SocialLoginManager {
             email: email,
             code: code,
             password: password,
+            configuration: configuration,
+            completion: completion
+        )
+    }
+
+    func checkEmailCode(
+        purpose: EmailCodeCheckPurpose,
+        code: String,
+        email: String?,
+        accessToken: String?,
+        completion: @escaping (Result<Void, SocialLoginError>) -> Void
+    ) {
+        guard let configuration else {
+            completion(.failure(.notConfigured))
+            return
+        }
+        backendClient.checkEmailCode(
+            purpose: purpose,
+            code: code,
+            email: email,
+            accessToken: accessToken,
             configuration: configuration,
             completion: completion
         )

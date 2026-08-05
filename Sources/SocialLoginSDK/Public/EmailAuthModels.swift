@@ -24,17 +24,11 @@ public struct EmailRegistrationStatus: Sendable {
     }
 }
 
-/// Result of email sign-up completion (no tokens issued; host must call `signInWithEmail`).
-public struct EmailSignUpResult: Sendable {
-    public let userID: String
-    public let email: String
-    public let registerCompleted: Bool
-
-    public init(userID: String, email: String, registerCompleted: Bool) {
-        self.userID = userID
-        self.email = email
-        self.registerCompleted = registerCompleted
-    }
+/// Purpose for `POST /auth/code/check` (OTP pre-check; does not consume the code).
+public enum EmailCodeCheckPurpose: String, Sendable {
+    case signUp = "sign_up"
+    case passwordReset = "password_reset"
+    case passwordChange = "password_change"
 }
 
 /// Result of `*/get_code` (sign-up / password reset / password change).

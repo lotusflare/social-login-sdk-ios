@@ -32,6 +32,7 @@ struct DemoEmailAuthView: View {
                     sectionTitle("Register / Sign-in")
                     buttonRow("Check Registered", viewModel.checkRegistered)
                     buttonRow("Send Sign-Up Code", viewModel.requestSignUpCode)
+                    buttonRow("Check Sign-Up Code", viewModel.checkSignUpCode)
                     buttonRow("Complete Sign-Up", viewModel.completeSignUp)
                     buttonRow("Email Sign-In", viewModel.signIn)
                 }
@@ -45,12 +46,14 @@ struct DemoEmailAuthView: View {
                 Group {
                     sectionTitle("Forgot Password")
                     buttonRow("Send Reset Code", viewModel.requestResetCode)
+                    buttonRow("Check Reset Code", viewModel.checkPasswordResetCode)
                     buttonRow("Reset Password", viewModel.resetPassword)
                 }
 
                 Group {
                     sectionTitle("Change Password (requires session)")
                     buttonRow("Send Change Code", viewModel.requestChangeCode)
+                    buttonRow("Check Change Code", viewModel.checkPasswordChangeCode)
                     buttonRow("Change (Current Password)", viewModel.changePasswordWithCurrent)
                     buttonRow("Change (Code)", viewModel.changePasswordWithCode)
                 }
