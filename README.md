@@ -381,9 +381,9 @@ The SDK delegates authorization to **Google Sign-In iOS SDK**. It automatically 
 
 | Provider | `id_token` field | `nonce` | `user_name` |
 |----------|------------------|---------|-------------|
-| Google | Google OIDC JWT | raw_nonce | omitted |
+| Google | Google OIDC JWT | raw_nonce | from Google profile when available |
 | Apple | Apple identity token JWT | raw_nonce (plaintext) | first authorization only (`Given Family`) |
-| Facebook | Facebook Limited Login **AuthenticationToken** (OIDC JWT) | raw_nonce (also passed into FB SDK) | omitted |
+| Facebook | Facebook Limited Login **AuthenticationToken** (OIDC JWT) | raw_nonce (also passed into FB SDK) | from Profile / token claims when available |
 
 ### Required configuration
 

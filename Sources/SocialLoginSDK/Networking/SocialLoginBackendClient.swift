@@ -53,7 +53,7 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
             loginType: payload.provider.rawValue,
             idToken: idTokenValue,
             nonce: nonce,
-            userName: payload.provider == .apple ? payload.userName : nil
+            userName: payload.userName
         )
 
         postJSON(

@@ -136,11 +136,39 @@ final class FacebookLoginProvider: SocialLoginProviderType {
                         userID: userID,
                         email: resolvedProfile?.email ?? claims?.email,
                         idToken: authenticationToken.tokenString,
-                        nonce: rawNonce
+                        nonce: rawNonce,
+                        userName: displayName(from: resolvedProfile, claims: claims)
                     )
                 )
             )
         }
+    }
+
+    private static func displayName(
+        from profile: Profile?,
+        claims: AuthenticationTokenClaims?
+    ) -> String? {
+        if let name = profile?.name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
+            return name
+        }
+
+        let profileParts = [profile?.firstName, profile?.lastName]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        let profileJoined = profileParts.joined(separator: " ")
+        if !profileJoined.isEmpty {
+            return profileJoined
+        }
+
+        if let claimName = claims?.name?.trimmingCharacters(in: .whitespacesAndNewlines), !claimName.isEmpty {
+            return claimName
+        }
+
+        let claimParts = [claims?.givenName, claims?.familyName]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        let claimJoined = claimParts.joined(separator: " ")
+        return claimJoined.isEmpty ? nil : claimJoined
     }
 
     private static func mapPermission(_ permission: FacebookPermission) -> Permission {

@@ -79,8 +79,23 @@ final class GoogleLoginProvider: SocialLoginProviderType {
             userID: user.userID ?? "",
             email: user.profile?.email,
             idToken: user.idToken?.tokenString,
-            nonce: rawNonce
+            nonce: rawNonce,
+            userName: displayName(from: user.profile)
         )
+    }
+
+    private static func displayName(from profile: GIDProfileData?) -> String? {
+        guard let profile else { return nil }
+        let trimmedName = profile.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedName.isEmpty {
+            return trimmedName
+        }
+
+        let parts = [profile.givenName, profile.familyName]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        let joined = parts.joined(separator: " ")
+        return joined.isEmpty ? nil : joined
     }
 
     private static func validateNonce(idToken: String, expectedNonce: String) -> Bool {
