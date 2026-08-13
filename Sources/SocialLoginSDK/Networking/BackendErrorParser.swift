@@ -73,6 +73,8 @@ enum BackendErrorParser {
             return .emailCodeAlreadyUsed(message: resolvedMessage)
         case .passwordPolicyViolation:
             return .passwordPolicyViolation(message: resolvedMessage)
+        case .socialAccountPasswordNotAllowed:
+            return .socialAccountPasswordNotAllowed(message: resolvedMessage)
         case .oauthAudienceMismatch:
             return .oauthAudienceMismatch(message: resolvedMessage)
         }

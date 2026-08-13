@@ -43,6 +43,9 @@ public enum SocialLoginError: Error, Sendable {
     /// Appauth `44224`: email verification code already used.
     case emailCodeAlreadyUsed(message: String)
     case passwordPolicyViolation(message: String)
+    /// Appauth `44227`: pure social account (no email-password binding) cannot
+    /// change password or request password-reset / password-change codes.
+    case socialAccountPasswordNotAllowed(message: String)
     case oauthNonceInvalid(String)
     case oauthAudienceMismatch(message: String)
 }
@@ -118,6 +121,8 @@ extension SocialLoginError: LocalizedError {
         case .emailCodeAlreadyUsed(let message):
             return message
         case .passwordPolicyViolation(let message):
+            return message
+        case .socialAccountPasswordNotAllowed(let message):
             return message
         case .oauthNonceInvalid(let message):
             return message

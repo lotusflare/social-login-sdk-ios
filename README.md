@@ -429,6 +429,7 @@ The SDK maps these common appauth business codes to typed errors:
 | 44223 | `emailCodeExpired` |
 | 44224 | `emailCodeAlreadyUsed` |
 | 44226 | `registrationAutoLoginFailed` — account created but auto-login failed; navigate like `emailAlreadyRegistered` (prompt `signInWithEmail`) |
+| 44227 | `socialAccountPasswordNotAllowed` — pure social account (no email-password binding); returned by password reset get_code / password change / change get_code; guide user to social sign-in |
 
 Unknown / non-`URLError` transport failures map to `backendRequestFailed(statusCode:code:message:)`. For `URLError`, `.timedOut` maps to `timeOut`; all other codes map to `networkError`. Known business codes map to the typed cases above.
 

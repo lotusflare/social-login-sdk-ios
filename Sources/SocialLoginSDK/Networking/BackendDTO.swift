@@ -242,6 +242,8 @@ enum BackendErrorCode: Int, Sendable {
     case emailCodeAlreadyUsed = 44224
     /// Sign-up succeeded but auto-login token issuance failed.
     case registrationAutoLoginFailed = 44226
+    /// Pure social account without email-password binding; password change/reset not allowed.
+    case socialAccountPasswordNotAllowed = 44227
 }
 
 enum TokenExpiry {
