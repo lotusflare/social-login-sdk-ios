@@ -96,7 +96,8 @@ struct BackendLogoutResponse: Decodable, Sendable, BackendCodedResponse {
 struct BackendErrorResponse: Decodable, Sendable {
     let code: Int?
     let message: String?
-    let body: BodyPayload?
+    /// Failure envelope extras (`exists_login_types`, timing fields). Success uses typed response `data`.
+    let data: BodyPayload?
 
     struct BodyPayload: Decodable, Sendable {
         let resendAfterSec: Int?

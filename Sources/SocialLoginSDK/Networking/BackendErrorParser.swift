@@ -5,7 +5,7 @@ enum BackendErrorParser {
         if let data,
            let response = try? BackendJSONCoder.decoder.decode(BackendErrorResponse.self, from: data),
            let code = response.code {
-            if let mapped = mapBusinessCode(code, message: response.message, body: response.body) {
+            if let mapped = mapBusinessCode(code, message: response.message, data: response.data) {
                 return mapped
             }
             return .backendRequestFailed(
@@ -22,10 +22,10 @@ enum BackendErrorParser {
     static func mapBusinessCode(
         _ code: Int,
         message: String?,
-        body: BackendErrorResponse.BodyPayload?
+        data: BackendErrorResponse.BodyPayload?
     ) -> SocialLoginError? {
         let resolvedMessage = message ?? "Backend request failed."
-        let loginTypes = (body?.existsLoginTypes ?? []).compactMap(SocialLoginLoginType.init(rawValue:))
+        let loginTypes = (data?.existsLoginTypes ?? []).compactMap(SocialLoginLoginType.init(rawValue:))
 
         guard let businessCode = BackendErrorCode(rawValue: code) else {
             return nil
@@ -59,9 +59,9 @@ enum BackendErrorParser {
         case .rateLimited:
             return .rateLimited(
                 message: resolvedMessage,
-                resendAfterSec: body?.resendAfterSec,
-                lockRemainingSec: body?.lockRemainingSec,
-                retryAfterSec: body?.retryAfterSec
+                resendAfterSec: data?.resendAfterSec,
+                lockRemainingSec: data?.lockRemainingSec,
+                retryAfterSec: data?.retryAfterSec
             )
         case .oauthNonceInvalid:
             return .oauthNonceInvalid(resolvedMessage)

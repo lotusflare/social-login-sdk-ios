@@ -415,13 +415,13 @@ The SDK maps these common appauth business codes to typed errors:
 | 44201 | `clientInvalid` |
 | 44202 | `loginMethodNotAllowed` |
 | 44203 | `userNotFound` |
-| 44204 | `invalidPassword` (may include `existsLoginTypes` from error `body`) |
-| 44205 | `emailAlreadyRegistered` (may include `existsLoginTypes` from error `body`) |
+| 44204 | `invalidPassword` (may include `existsLoginTypes` from error `data`) |
+| 44205 | `emailAlreadyRegistered` (may include `existsLoginTypes` from error `data`) |
 | 44206 | `registrationNotAllowed` |
 | 44207 | `oauthTokenInvalid` |
 | 44208 | `oauthEmailConflict` |
 | 44209 | `refreshTokenInvalid` |
-| 44211 | `rateLimited` — optional `resendAfterSec` / `lockRemainingSec` / `retryAfterSec` from error `body` |
+| 44211 | `rateLimited` — optional `resendAfterSec` / `lockRemainingSec` / `retryAfterSec` from error `data` |
 | 44214 | `emailCodeInvalid` |
 | 44219 | `passwordPolicyViolation` |
 | 44221 | `oauthNonceInvalid` — restart from fetching a new nonce |

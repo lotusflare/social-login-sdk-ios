@@ -30,7 +30,7 @@ public enum SocialLoginError: Error, Sendable {
     case accessTokenInvalid(message: String)
     /// Appauth `44209`, or a missing / unusable refresh token on the client.
     case refreshTokenInvalid(message: String)
-    /// Appauth `44211`. Timing fields come from error `body` when present.
+    /// Appauth `44211`. Timing fields come from error `data` when present.
     case rateLimited(
         message: String,
         resendAfterSec: Int? = nil,
