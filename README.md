@@ -15,6 +15,7 @@ A Swift Package that aggregates social login providers for host apps, plus **ema
 | `SocialLoginSDK.restoreSession` / `loadPersistedSession` | Removed — host owns session storage |
 | `SocialLoginSDK.currentSession` / `isLoggedIn` | Removed — host tracks login state |
 | `SocialLoginError.backendExchangeFailed` / `backendLoginFailed` / `nonceFailed` / `logoutFailed` | `backendRequestFailed(statusCode:code:message:)` |
+| `SocialLoginError.providerSignInFailed` | Split into provider-specific cases — see **Client-side and provider errors** |
 | `SocialLoginError.sessionNotFound` | Removed |
 | `BackendConfiguration` required in `configure` | Optional; prefer Info.plist backend keys |
 | Google / Facebook client IDs on `SocialLoginConfiguration` | Removed — Info.plist only (`GIDClientID`, `GIDServerClientID`, `FacebookAppID`, `FacebookClientToken`) |
@@ -432,6 +433,31 @@ The SDK maps these common appauth business codes to typed errors:
 | 44227 | `socialAccountPasswordNotAllowed` — pure social account (no email-password binding); returned by password reset get_code / password change / change get_code; guide user to social sign-in |
 
 Unknown / non-`URLError` transport failures map to `backendRequestFailed(statusCode:code:message:)`. For `URLError`, `.timedOut` maps to `timeOut`; all other codes map to `networkError`. Known business codes map to the typed cases above.
+
+### Client-side and provider errors
+
+These cases are raised inside the SDK before or during provider OAuth (not mapped from appauth business codes). Grouped to match `SocialLoginError`:
+
+| Group | SDK error | Typical cause |
+|-------|-----------|---------------|
+| General | `notConfigured` | `setup` not called |
+| | `missingProviderConfiguration` | Provider credentials missing in Info.plist |
+| | `missingBackendConfiguration` | Gateway `baseURL` / `clientID` missing |
+| | `cancelled` | User cancelled provider sign-in |
+| | `missingPresenter` | No window / view controller to present from |
+| | `missingProviderIDToken` | Provider payload has no `id_token` before backend `sign_in` |
+| Apple | `appleSignInFailed` | `ASAuthorization` error |
+| | `appleUnexpectedCredentialType` | Non-Apple ID credential returned |
+| Facebook | `missingSocialNonce` | Empty nonce before Limited Login |
+| | `invalidFacebookLoginConfiguration` | `LoginConfiguration` could not be built |
+| | `facebookSignInFailed` | Facebook SDK login failed |
+| | `missingFacebookAuthenticationToken` | No authentication token after login |
+| | `facebookProfileLoadFailed` | `Profile.loadCurrentProfile` failed |
+| | `missingFacebookUserIdentifier` | No user ID from profile / token claims |
+| Google | `googleSignInFailed` | Google Sign-In SDK error |
+| | `missingGoogleSignInResult` | Nil result from Google SDK |
+
+`oauthNonceInvalid` may also be raised client-side (e.g. Google ID token nonce mismatch) in addition to appauth `44221`.
 
 ### Session ownership
 

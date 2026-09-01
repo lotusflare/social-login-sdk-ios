@@ -67,7 +67,7 @@ extension AppleSignInCoordinator: ASAuthorizationControllerDelegate {
         didCompleteWithAuthorization authorization: ASAuthorization
     ) {
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
-            finish(with: .failure(.providerSignInFailed(.apple, message: "Unexpected credential type.")))
+            finish(with: .failure(.appleUnexpectedCredentialType(message: "Unexpected credential type.")))
             return
         }
 
@@ -85,7 +85,7 @@ extension AppleSignInCoordinator: ASAuthorizationControllerDelegate {
             return
         }
 
-        finish(with: .failure(.providerSignInFailed(.apple, message: error.localizedDescription)))
+        finish(with: .failure(.appleSignInFailed(message: error.localizedDescription)))
     }
 }
 

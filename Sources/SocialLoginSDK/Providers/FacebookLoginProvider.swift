@@ -32,13 +32,13 @@ final class FacebookLoginProvider: SocialLoginProviderType {
 
         guard !rawNonce.isEmpty else {
             completion(
-                .failure(.providerSignInFailed(.facebook, message: "Missing social nonce for Limited Login."))
+                .failure(.missingSocialNonce(message: "Missing social nonce for Limited Login."))
             )
             return
         }
 
         guard let loginConfiguration = makeLimitedLoginConfiguration(rawNonce: rawNonce) else {
-            completion(.failure(.providerSignInFailed(.facebook, message: "Invalid Facebook login configuration.")))
+            completion(.failure(.invalidFacebookLoginConfiguration(message: "Invalid Facebook login configuration.")))
             return
         }
 
@@ -47,13 +47,13 @@ final class FacebookLoginProvider: SocialLoginProviderType {
             case .cancelled:
                 completion(.failure(.cancelled))
             case .failed(let error):
-                completion(.failure(.providerSignInFailed(.facebook, message: error.localizedDescription)))
+                completion(.failure(.facebookSignInFailed(message: error.localizedDescription)))
             case .success:
                 guard let authenticationToken = AuthenticationToken.current,
                       !authenticationToken.tokenString.isEmpty else {
                     completion(
                         .failure(
-                            .providerSignInFailed(.facebook, message: "Missing Facebook authentication token.")
+                            .missingFacebookAuthenticationToken(message: "Missing Facebook authentication token.")
                         )
                     )
                     return
@@ -115,7 +115,7 @@ final class FacebookLoginProvider: SocialLoginProviderType {
     ) {
         Profile.loadCurrentProfile { profile, error in
             if let error {
-                completion(.failure(.providerSignInFailed(.facebook, message: error.localizedDescription)))
+                completion(.failure(.facebookProfileLoadFailed(message: error.localizedDescription)))
                 return
             }
 
@@ -124,7 +124,7 @@ final class FacebookLoginProvider: SocialLoginProviderType {
             let userID = resolvedProfile?.userID ?? claims?.sub ?? ""
             guard !userID.isEmpty else {
                 completion(
-                    .failure(.providerSignInFailed(.facebook, message: "Missing Facebook user identifier."))
+                    .failure(.missingFacebookUserIdentifier(message: "Missing Facebook user identifier."))
                 )
                 return
             }

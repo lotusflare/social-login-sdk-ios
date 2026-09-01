@@ -50,7 +50,7 @@ final class GoogleLoginProvider: SocialLoginProviderType {
             }
 
             guard let result else {
-                completion(.failure(.providerSignInFailed(.google, message: "Missing sign-in result.")))
+                completion(.failure(.missingGoogleSignInResult(message: "Missing sign-in result.")))
                 return
             }
 
@@ -132,6 +132,6 @@ final class GoogleLoginProvider: SocialLoginProviderType {
            nsError.code == GIDSignInError.canceled.rawValue {
             return .cancelled
         }
-        return .providerSignInFailed(.google, message: error.localizedDescription)
+        return .googleSignInFailed(message: error.localizedDescription)
     }
 }

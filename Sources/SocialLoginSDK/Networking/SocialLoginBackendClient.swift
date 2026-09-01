@@ -37,7 +37,7 @@ final class SocialLoginBackendClient: SocialLoginBackendServicing {
         completion: @escaping (Result<SocialLoginSession, SocialLoginError>) -> Void
     ) {
         guard let idTokenValue = payload.idToken, !idTokenValue.isEmpty else {
-            completion(.failure(.providerSignInFailed(payload.provider, message: "Missing provider token.")))
+            completion(.failure(.missingProviderIDToken(provider: payload.provider, message: "Missing provider token.")))
             return
         }
         guard let nonce = payload.nonce, !nonce.isEmpty else {
